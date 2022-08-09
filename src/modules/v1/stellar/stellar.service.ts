@@ -59,6 +59,7 @@ class StellarService {
 
     // send user info to anchor server
     const {data} = await axios.post(this.anchor_user_endpoint, user_detail).catch((e) => {
+      console.log(user_detail)
       throw catchError('Error creating user detail', 400) });
     console.log(data);
 
@@ -87,6 +88,10 @@ class StellarService {
       throw catchError('Error processing your deposit. Please try again', 400)
     });
     return sep6;
+  }
+
+  public async withdrawAsset(){
+    console.log('end of withdrawasset function')
   }
 
   public async toml() {
