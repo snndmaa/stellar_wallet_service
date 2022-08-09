@@ -42,25 +42,21 @@ class StellarService {
     const balances = await this.getBalance();
 
     const hasCurrency = this.hasCurrency(balances);
-    console.log(hasCurrency);
     if (hasCurrency === -1) {
       await this.trustAsset();
     }
 
     // get info from anchor server
     const info = await this.getAnchorInfo();
-    console.log('info', info);
 
     // get anchor auth jwt
     const auth = await this.getAnchorAuth();
-    console.log(auth, 'auth');
     const transaction = await this.transaction(auth.transaction, auth.network_passphrase);
     const token = await this.getAnchoJWT(transaction);
 
     // send user info to anchor server
     const {data} = await axios.post(this.anchor_user_endpoint, user_detail).catch((e) => {
       throw catchError('Error creating user detail', 400) });
-    console.log(data);
 
     // create user account on anchor
     const account = {
@@ -87,6 +83,23 @@ class StellarService {
       throw catchError('Error processing your deposit. Please try again', 400)
     });
     return sep6;
+  }
+
+  public async withdraw() {
+    const balances = await this.getBalance();
+
+    const hasCurrency = this.hasCurrency(balances);
+    if (hasCurrency === -1) {
+      await this.trustAsset();
+    }
+
+    // get info from anchor server
+    const info = await this.getAnchorInfo();
+
+    // get anchor auth jwt
+    const auth = await this.getAnchorAuth();
+    const transaction = await this.transaction(auth.transaction, auth.network_passphrase);
+    const token = await this.getAnchoJWT(transaction);
   }
 
   public async toml() {

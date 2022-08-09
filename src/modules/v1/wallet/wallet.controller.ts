@@ -88,7 +88,7 @@ export const deposit = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { amount, userId, email, pinCode, currency, issuer } = req.body;
+  const { first_name, last_name, amount, userId, email, pinCode, currency, issuer } = req.body;
   try {
     const wallet = await new WalletService(userId).getWallet();
     if (!wallet) {
@@ -106,14 +106,14 @@ export const deposit = async (
       issuer
     ).depositAsset(
       {
-        first_name: "Dare",
-        last_name: "Aderemi",
+        first_name,
+        last_name,
         email,
       },
       {
+        account: wallet.publicKey,
         memo: randomBytes(16).toString("hex"),
         muxed_account: randomBytes(16).toString("hex"),
-        account: wallet.publicKey,
       },
       amount
     );
