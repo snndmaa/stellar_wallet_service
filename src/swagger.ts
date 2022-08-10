@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import ProductDocs from './modules/v1/product/product.docs';
+import WalletDocs from './modules/v1/wallet/wallet.docs';
 
 config();
 
@@ -9,21 +9,20 @@ const doc = {
   swagger: '2.0',
   info: {
     version: '1.0.0',
-    title: 'Elink Product Management Service API',
+    title: 'Elink Wallet Service API',
     description: 'An Application to manage elink products',
   },
   host: BACKEND_URL || `localhost:${PORT}/`,
   basePath: '/',
   tags: [
-    // Add tags here
-    'Product',
+    'Wallet',
   ],
   schemes: ['http', 'https'],
   consumes: ['application/json'],
   produces: ['application/json'],
   paths: {
     // Add docs here
-    ...ProductDocs,
+    ...WalletDocs,
   },
   securityDefinitions: {
     Bearer: {

@@ -92,7 +92,7 @@ export const deposit = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { amount, userId, email, pinCode, currency, issuer } = req.body;
+  const { first_name, last_name, amount, userId, email, pinCode, currency, issuer } = req.body;
   try {
     const wallet = await new WalletService(userId).getWallet();
     if (!wallet) {
