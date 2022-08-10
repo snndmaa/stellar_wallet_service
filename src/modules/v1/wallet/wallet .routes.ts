@@ -4,6 +4,7 @@ import {
     createAcount,
     getWallet,
     deposit,
+    withdraw
 } from './wallet.controller';
 
 const router = Router();
@@ -14,6 +15,9 @@ router.route('/')
 router.route('/stellar')
     .post(deposit)
     .get(currencyList);
+
+router.route('/withdraw')
+    .post(withdraw)
 
 router.route('/:userId')
     .get(getWallet);

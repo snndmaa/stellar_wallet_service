@@ -14,8 +14,9 @@ import {
 import { get as loGet, findIndex as loFindIndex } from "lodash";
 import { IAccountDetails, IUserDetails } from "../../../types";
 import { catchError } from "../../common/utils";
+import StellarService from "./stellar.service";
 
-class StellarService {
+class StellarAnchorService {
   homeDomain = process.env.HOME_DOMAIN;
   anchor_user_endpoint = process.env.ANCHOR_USER_ENDPOINT;
   server = new Server("https://horizon-testnet.stellar.org");
@@ -39,25 +40,29 @@ class StellarService {
   }
 
   public async depositAsset(user_detail: IUserDetails, account_detail: IAccountDetails, amount: number) {
-    const balances = await this.getBalance();
+    const balances = await new StellarService().getBalance();
 
-    const hasCurrency = this.hasCurrency(balances);
+    const hasCurrency = new StellarService().hasCurrency(balances);
+    console.log(hasCurrency);
     if (hasCurrency === -1) {
       await this.trustAsset();
     }
 
     // get info from anchor server
     const info = await this.getAnchorInfo();
+    console.log('info', info);
 
     // get anchor auth jwt
     const auth = await this.getAnchorAuth();
-    const transaction = await this.transaction(auth.transaction, auth.network_passphrase);
+    console.log(auth, 'auth');
+    const transaction = await new StellarService().transaction(auth.transaction, auth.network_passphrase);
     const token = await this.getAnchoJWT(transaction);
 
     // send user info to anchor server
     const {data} = await axios.post(this.anchor_user_endpoint, user_detail).catch((e) => {
       console.log(user_detail)
       throw catchError('Error creating user detail', 400) });
+    console.log(data);
 
     // create user account on anchor
     const account = {
@@ -86,23 +91,12 @@ class StellarService {
     return sep6;
   }
 
+  public async withdrawAsset(){
+    console.log('end of withdrawasset function')
+  }
+
   public async toml() {
     return await StellarTomlResolver.resolve(this.homeDomain);
-  }
-
-  public async updateAccount() {
-    const account = await this.server.loadAccount(this.publicKey);
-    return account;
-  }
-
-  public async fundAccountWithXLM() {
-    const xlmPayment = await axios.get(`https://friendbot.stellar.org?addr=${this.publicKey}`);
-    return xlmPayment;
-  }
-
-  public generateKeypair() {
-    const keypair = Keypair.random();
-    return { publicKey: keypair.publicKey(), secretKey: keypair.secret() };
   }
 
   public async trustAsset() {
@@ -129,27 +123,7 @@ class StellarService {
       });
 
     return trust;
-  }
-
-  public async getBalance() {
-    const { balances } = await this.server.loadAccount(this.publicKey);
-    return balances;
-    // const balance = loGet(
-    //   { publicKey: this.publicKey, secretKey: this.secretKey },
-    //   "state.balance"
-    // );
-    // console.log(balance, this.publicKey, this.secretKey, 'this is balance - getBalance');
-    // return balance;
-  }
-
-  public hasCurrency(balances: any[]) {
-    const hasCurrency = loFindIndex(balances, {
-      //@ts-ignore
-      asset_code: this.asset_code,
-      asset_issuer: this.asset_issuer,
-    });
-    return hasCurrency;
-  }
+    }
 
   public async getAnchoJWT(transaction: any) {
     const toml = await this.toml();
@@ -175,12 +149,6 @@ class StellarService {
     return data;
   }
 
-  public async transaction(transaction: any, network_passphrase: any) {
-    console.log(transaction, network_passphrase, 'this is transaction - transaction');
-    const transactions = new Transaction(transaction, network_passphrase);
-    transactions.sign(Keypair.fromSecret(this.secretKey));
-    return transactions.toXDR();
-  }
 }
 
-export default StellarService;
+export default StellarAnchorService;
