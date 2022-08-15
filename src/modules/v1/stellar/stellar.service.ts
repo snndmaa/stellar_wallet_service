@@ -105,6 +105,37 @@ class StellarService {
     return { publicKey: keypair.publicKey(), secretKey: keypair.secret() };
   }
 
+  public async withdrawAsset(amount: string, email: string, accountNumber: string) {
+    const balances = await this.getBalance();
+
+    const hasCurrency = this.hasCurrency(balances);
+    if (hasCurrency === -1) {
+      await this.trustAsset();
+    }
+
+    // get info from anchor server
+    const info = await this.getAnchorInfo();
+
+    // get anchor auth jwt
+    const auth = await this.getAnchorAuth();
+    const transaction = await this.transaction(auth.transaction, auth.network_passphrase);
+    const token = await this.getAnchoJWT(transaction);
+
+    const toml = await this.toml();
+
+    const sep6 = await axios.get(`${toml.TRANSFER_SERVER}/withdraw?asset_code=${this.asset_code}&account=${this.publicKey}&amount=${amount}&email=${email}&dest=${accountNumber}&lang=en`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    }).catch((e) => {
+      console.log(e);
+      throw catchError('Error processing your deposit. Please try again', 400)
+    });
+    return sep6;
+
+  }
+
   public async trustAsset() {
     const trust = await this.server
       .accounts()
@@ -134,12 +165,6 @@ class StellarService {
   public async getBalance() {
     const { balances } = await this.server.loadAccount(this.publicKey);
     return balances;
-    // const balance = loGet(
-    //   { publicKey: this.publicKey, secretKey: this.secretKey },
-    //   "state.balance"
-    // );
-    // console.log(balance, this.publicKey, this.secretKey, 'this is balance - getBalance');
-    // return balance;
   }
 
   public hasCurrency(balances: any[]) {

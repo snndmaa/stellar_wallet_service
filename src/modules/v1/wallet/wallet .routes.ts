@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
+    deposit,
+    withdraw,
+    getWallet,
     currencyList,
     createAcount,
-    getWallet,
-    deposit,
-    withdraw
 } from './wallet.controller';
 
 const router = Router();

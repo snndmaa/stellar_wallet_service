@@ -135,27 +135,27 @@ export const withdraw = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { first_name, last_name, email, amount, userId, pinCode, currency, issuer } = req.body;
+  const { first_name, last_name, email, amount, userId, pinCode, currency, issuer, accountNumber } = req.body;
   try {
-    // const wallet = await new WalletService(userId).getWallet();
-    // if (!wallet) {
-    //   throw catchError("Wallet not found", 400);
-    // }
+    const wallet = await new WalletService(userId).getWallet();
+    if (!wallet) {
+      throw catchError("Wallet not found", 400);
+    }
 
-    // if (wallet.pinCode !== pinCode) {
-    //   throw catchError("Invalid pin code", 400);
-    // }
+    if (wallet.pinCode !== pinCode) {
+      throw catchError("Invalid pin code", 400);
+    }
 
-    // const stellarService = await new StellarService(
-    //   wallet.publicKey,
-    //   wallet.secretKey,
-    //   currency,
-    //   issuer
-    // )
+    const stellarService = await new StellarService(
+      wallet.publicKey,
+      wallet.secretKey,
+      currency,
+      issuer
+    ).withdrawAsset(amount, email, accountNumber);
 
     return res
       .status(200)
-      .json({"message": "controller withdraw"})
+      .json(success("Withdraw successful", stellarService, { wallet }));
 
 }   catch (error) {
       next(error);
