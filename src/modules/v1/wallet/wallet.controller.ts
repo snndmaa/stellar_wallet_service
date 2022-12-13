@@ -6,6 +6,8 @@ import WalletService from "./wallet.service";
 import { randomBytes } from 'crypto';
 import { isAwaitExpression } from "typescript";
 
+import { Server } from 'stellar-sdk'
+
 export const createAcount = async (
   req: Request,
   res: Response,
@@ -160,4 +162,19 @@ export const withdraw = async (
 }   catch (error) {
       next(error);
     }
+
+}
+
+export const uiBalance = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  ) => {
+
+  const { publicKey, secretKey, asset_code, asset_issuer } = req.body
+  console.log(publicKey)
+  const bal_obj = await new StellarService(publicKey, secretKey, asset_code, asset_issuer).getBalance()
+
+  return res.json(success('Balance Object:', bal_obj));
+
 }

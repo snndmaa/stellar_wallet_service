@@ -5,6 +5,7 @@ import {
     getWallet,
     currencyList,
     createAcount,
+    uiBalance,
 } from './wallet.controller';
 
 const router = Router();
@@ -19,7 +20,12 @@ router.route('/stellar')
 router.route('/withdraw')
     .post(withdraw)
 
+router.route('/zzz')
+    .post(uiBalance)
+
 router.route('/:userId')
-    .get(getWallet);
+    .post(getWallet);
+
+
 
 export default router;
